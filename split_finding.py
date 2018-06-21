@@ -44,6 +44,7 @@ model.fit(X, y)
 fig, ax = plt.subplots(1, 1, figsize=(6, 6))
 ax = plot_tree(model, num_trees=0, ax=ax)
 
+# Split finding
 g_i = y - base_score
 h_i = pd.Series([1] * y.shape[0])
 
@@ -52,7 +53,7 @@ G = g_i.sum()
 H = h_i.sum()
 
 score = 0
-best_split = None
+best_splits = []
 
 fig, ax = plt.subplots(1, 1)
 for k in X.columns:
@@ -78,32 +79,19 @@ for k in X.columns:
         local_scores
     ).set_index('index')[k]
     
+    feature_value = local_scores[
+        local_scores.idxmax()
+    ].index[0]
     
-    local_scores[local_scores.idxmax()]
-    local_scores.loc[[7, 8, 9]]
-    
-
-
-for local_score in scores:
-    
-
-    
+    score_max = local_scores.max()
+    best_splits.append([feature_value, score_max])
+        
     local_scores.plot(
         grid=True,
         legend=True,
-        )
-    fig
-        print(local_score)
-        if score < local_score:
-            score = local_score
-            score_best = (k, j[k])
-    print(score_best)
+        ax=ax)
     
-        
-    f = 'LSTAT'
-    
-
-
+# Optimal weight
 feature = 'LSTAT'
 th = 7.5
 L = y[X[feature] < th]
