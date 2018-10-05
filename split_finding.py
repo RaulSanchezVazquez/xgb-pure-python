@@ -55,14 +55,22 @@ H = h_i.sum()
 score = 0
 best_splits = []
 
-fig, ax = plt.subplots(1, 1)
+fig, ax = plt.subplots(1, 1, figsize=(12, 12))
 for k in X.columns:
+    k = 'LSTAT'
     G_L, H_L = 0, 0
     local_scores = []
-    for j_idx, j in X.sort_values(k)[[k]].iterrows():
-        G_L += g_i[j_idx]; H_L += h_i[j_idx]
-        G_R = G - G_L; H_R = H - H_L
-        
+    X_grp = X.groupby(k)
+    X_f_sorted = sorted(X[k].unique())
+
+    for j in X_f_sorted:
+        j_idxs = X_grp.get_group(j).index.tolist()
+        G_L += g_i[j_idxs].sum()
+        H_L += h_i[j_idxs].sum()
+
+        G_R = G - G_L
+        H_R = H - H_L
+
         local_score = (
             G_L**2 / (H_L + reg_lambda)
         ) + (
@@ -70,27 +78,30 @@ for k in X.columns:
         ) - (
             G**2 / (H + reg_lambda)
         )
-        
+
         local_scores.append({
-            'index': j[k],
+            'index': j,
             k: local_score})
-    
+
     local_scores = pd.DataFrame(
         local_scores
     ).set_index('index')[k]
-    
+
     feature_value = local_scores[
-        local_scores.idxmax()
-    ].index[0]
-    
+        int(local_scores.idxmax())
+    ]
+
     score_max = local_scores.max()
     best_splits.append([feature_value, score_max])
-        
+
     local_scores.plot(
         grid=True,
         legend=True,
         ax=ax)
-    
+
+local_scores.argmax()
+ax.set_xlim(0, 400)
+fig
 # Optimal weight
 feature = 'LSTAT'
 th = 7.5
